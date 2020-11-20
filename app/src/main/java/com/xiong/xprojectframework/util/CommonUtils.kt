@@ -1,4 +1,4 @@
-package com.xiong.commontestdemo.util
+package com.xiong.xprojectframework.util
 
 import android.content.Context
 
