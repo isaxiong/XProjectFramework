@@ -6,7 +6,6 @@ buildscript {
         google()
         jcenter()
         maven { url "http://maven.aliyun.com/nexus/content/groups/public/" } // 阿里云镜像服务
-//        maven { url 'https://dl.bintray.com/umsdk/release' }
 
     }
     dependencies {

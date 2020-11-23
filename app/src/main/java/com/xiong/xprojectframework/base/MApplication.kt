@@ -2,9 +2,11 @@ package com.xiong.xprojectframework.base
 
 import android.app.Application
 import android.util.Log
+import com.alibaba.android.arouter.launcher.ARouter
 import com.umeng.commonsdk.UMConfigure
 import com.umeng.message.IUmengRegisterCallback
 import com.umeng.message.PushAgent
+import com.xiong.xprojectframework.BuildConfig
 import com.xiong.xprojectframework.base.AppConfig.COMMON_TAG
 
 /**
@@ -17,9 +19,16 @@ class MApplication: Application() {
     override fun onCreate() {
         super.onCreate()
 
+        initUMConfig()
+        initARouterConfig()
+
+    }
+
+    // 友盟SDK初始化
+    private fun initUMConfig() {
         UMConfigure.init(this,
             AppConfig.UM_APP_KEY,
-            "Umeng",    // 渠道名称
+            "XProjectFramework",    // 渠道名称
             UMConfigure.DEVICE_TYPE_PHONE,
             AppConfig.UM_MESSAGE_SECRET
         )
@@ -39,6 +48,15 @@ class MApplication: Application() {
                 Log.e(COMMON_TAG, "注册失败：-------->  s: $s, error: $s1")
             }
         })
-
     }
+
+    // ARouter初始化
+    private fun initARouterConfig() {
+        if (BuildConfig.DEBUG) {
+            ARouter.openLog()
+            ARouter.openDebug()
+        }
+        ARouter.init(this)
+    }
+
 }

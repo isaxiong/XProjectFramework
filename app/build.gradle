@@ -1,7 +1,9 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'org.greenrobot.greendao'
+apply plugin: 'com.alibaba.arouter'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -14,13 +16,17 @@ android {
         versionName "1.0"
         multiDexEnabled true
 
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments = [AROUTER_MODULE_NAME: "MainApp"]
+                arguments = [moduleName: "main"]
             }
         }
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        kapt {
+            arguments {
+                arg("AROUTER_MODULE_NAME", "main")
+            }
+        }
     }
 
     greendao {
@@ -45,6 +51,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(":vipcomponent")
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.2.0'
@@ -58,7 +65,7 @@ dependencies {
 
     /* ------------ARouter-------------- */
     implementation "com.alibaba:arouter-api:$rootProject.ext.arouterVersion"
-    annotationProcessor "com.alibaba:arouter-compiler:$rootProject.ext.arouterVersion"
+    kapt "com.alibaba:arouter-compiler:$rootProject.ext.arouterVersion"
 
     /* ------------网络-------------- */
     implementation "com.zhouyou:rxeasyhttp:$rootProject.ext.rxeasyhttpVersion"
