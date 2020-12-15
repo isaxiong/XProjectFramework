@@ -6,6 +6,7 @@ import android.view.Menu
 import android.view.MenuItem
 import com.alibaba.android.arouter.facade.annotation.Route
 import com.alibaba.android.arouter.launcher.ARouter
+import com.xiong.xprojectframework.widget.TestBottomSheetDialogFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import org.greenrobot.greendao.AbstractDaoMaster
 
@@ -38,6 +39,13 @@ class MainActivity : AppCompatActivity() {
         btn_test_jump_vip_page.setOnClickListener {
             ARouter.getInstance().build("/vip/HomeActivity").navigation()
         }
+        btn_open_bottom_sheet.setOnClickListener {
+            openBottomSheet()
+        }
+    }
+
+    private fun openBottomSheet() {
+        TestBottomSheetDialogFragment.getInstance().show(supportFragmentManager, "TestBottomSheetDialogFragment")
     }
 
 }

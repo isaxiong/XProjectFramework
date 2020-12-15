@@ -27,6 +27,16 @@
         app:layout_constraintTop_toBottomOf="@id/tv_main_content"
         android:text="跳转VIP首页"/>
 
+    <Button
+        android:id="@+id/btn_open_bottom_sheet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_test_jump_vip_page"
+        android:text="开启BottomSheet"/>
+
 
 
 <!--    <androidx.recyclerview.widget.RecyclerView-->
