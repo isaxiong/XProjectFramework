@@ -1,11 +1,13 @@
 package com.xiong.xprojectframework.util
 
+import android.content.Context
+import android.os.CountDownTimer
 import android.os.Handler
 
 
 /**
  * @author xiong
- * @since  2020/12/16
+ * @since  2020/12/14
  * @description 定时器辅助类
  **/
 object ClockTimerHelper {
@@ -13,6 +15,8 @@ object ClockTimerHelper {
     private var isClockStarted: Boolean = false
     private var mInternalHandler: Handler? = null
     private var mClockScheduleCallback: ClockScheduleCallback? = null
+    // TODO xiong -- 补充：添加CountDownTimer
+    private var mCountDownTimer: CountDownTimer? = null
 
     private val MSG_TIME_COMPLETED = 10001
 
@@ -29,6 +33,50 @@ object ClockTimerHelper {
             }
         }
         return mInternalHandler!!
+    }
+
+
+    fun startCountTime(internalTime: Long, clockScheduleCallback: ClockScheduleCallback) {
+        if (isClockStarted) return
+        isClockStarted = true
+        mClockScheduleCallback = clockScheduleCallback
+        mCountDownTimer = object : CountDownTimer(internalTime, 1000) {
+            override fun onFinish() {
+                mClockScheduleCallback?.onClockUp()
+                stopCountTime()
+            }
+
+            override fun onTick(millisUntilFinished: Long) {
+                mClockScheduleCallback?.onClockIntervalTimeTick(millisUntilFinished)
+            }
+        }
+        if (internalTime == 0L) {
+            stopCountTime()
+        } else {
+            mCountDownTimer?.start()
+        }
+    }
+
+    fun stopCountTime() {
+        if (!isClockStarted) return
+        isClockStarted = false
+        mCountDownTimer?.cancel()
+        mCountDownTimer = null
+    }
+
+    fun isClockStart(): Boolean {
+        return isClockStarted
+    }
+
+
+
+    /**
+     * 绑定Context
+     */
+    private var mContext: Context? = null
+    fun bindContext(context: Context): ClockTimerHelper {
+        mContext = context
+        return this
     }
 
     /**
@@ -82,12 +130,28 @@ object ClockTimerHelper {
         return true
     }
 
-
     interface ClockScheduleCallback {
         /**
          * 定时时间到
          */
         fun onClockUp()
+
+        /**
+         * 间隔时间回调
+         * @param millisUntilFinished 间隔时间
+         */
+        fun onClockIntervalTimeTick(millisUntilFinished: Long)
+    }
+
+    class CallbackFactory {
+
+        fun dispatchFragment() {
+
+        }
+
+        fun dispatchService() {
+
+        }
     }
 
 }
