@@ -10,7 +10,8 @@ import android.view.View
 import com.alibaba.android.arouter.facade.annotation.Route
 import com.alibaba.android.arouter.launcher.ARouter
 import com.xiong.xprojectframework.util.TimeFormatUtil
-import com.xiong.xprojectframework.util.XCountDownTimerHelper
+import com.xiong.xprojectframework.util.CountDownTimerHelper
+import com.xiong.xprojectframework.widget.BaseBottomDialogFragment
 import com.xiong.xprojectframework.widget.TestBottomSheetDialogFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import org.greenrobot.greendao.AbstractDaoMaster
@@ -28,7 +29,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         setContentView(R.layout.activity_main)
 
         initView()
-        XCountDownTimerHelper.setXOnCountDownTimerListener(object : XCountDownTimerHelper.OnXCountDownTimerListener {
+        CountDownTimerHelper.setOnCountDownTimerListener(object : CountDownTimerHelper.OnCountDownTimerListener {
             override fun onCountDownFinished() {
                 Log.w("xiong", " === onCountDownFinished === ")
                 tv_remain_time.text = "倒计时结束"
@@ -69,25 +70,34 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         btn_start_timer.setOnClickListener(this)
         btn_cancel_timer.setOnClickListener(this)
         btn_reset_timer.setOnClickListener(this)
+        btn_stop_timer.setOnClickListener(this)
+        btn_resume_timer.setOnClickListener(this)
     }
 
     private fun openBottomSheet() {
-        TestBottomSheetDialogFragment.getInstance().show(supportFragmentManager, "TestBottomSheetDialogFragment")
+        BaseBottomDialogFragment().show(supportFragmentManager, "BaseBottomDialogFragmentTest")
+//        TestBottomSheetDialogFragment.getInstance().show(supportFragmentManager, "TestBottomSheetDialogFragment")
     }
 
     override fun onClick(v: View) {
         when(v.id) {
             R.id.btn_start_timer -> {
-                if (!TextUtils.isEmpty(et_time_duration.text) && !TextUtils.isEmpty(et_time_interval.text)) {
-                    XCountDownTimerHelper.startTimer(et_time_duration.text.toString().toLong(), et_time_interval.text.toString().toLong())
+                if (!TextUtils.isEmpty(et_time_duration.text)) {
+                    CountDownTimerHelper.startTimer(et_time_duration.text.toString().toLong(), et_time_interval.text.toString().toLong())
                 }
             }
             R.id.btn_cancel_timer ->
-                XCountDownTimerHelper.cancelTimer()
+                CountDownTimerHelper.cancelTimer()
             R.id.btn_reset_timer -> {
-                if (!TextUtils.isEmpty(et_time_duration.text) && !TextUtils.isEmpty(et_time_interval.text)) {
-                    XCountDownTimerHelper.resetTimer(et_time_duration.text.toString().toLong(), et_time_interval.text.toString().toLong())
+                if (!TextUtils.isEmpty(et_time_duration.text)) {
+                    CountDownTimerHelper.resetTimer(et_time_duration.text.toString().toLong(), et_time_interval.text.toString().toLong())
                 }
+            }
+            R.id.btn_stop_timer -> {
+                CountDownTimerHelper.stopTimer()
+            }
+            R.id.btn_resume_timer -> {
+                CountDownTimerHelper.resumeTimer()
             }
         }
     }

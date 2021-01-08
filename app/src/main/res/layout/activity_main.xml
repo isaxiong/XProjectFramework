@@ -48,12 +48,22 @@
             android:id="@+id/btn_start_timer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="启动定时器"/>
+            android:text="启动"/>
         <Button
             android:id="@+id/btn_cancel_timer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="取消定时器"/>
+            android:text="取消"/>
+        <Button
+            android:id="@+id/btn_stop_timer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="暂停"/>
+        <Button
+            android:id="@+id/btn_resume_timer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="恢复"/>
         <TextView
             android:id="@+id/tv_remain_time"
             android:layout_width="wrap_content"

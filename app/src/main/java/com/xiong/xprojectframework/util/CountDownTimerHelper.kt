@@ -8,12 +8,20 @@ import android.util.Log
 
 /**
  * @author xiong
- * @since  2020/12/30
- * @description 倒计时定时器
+ * @since  2020/12/31
+ * @description 倒计时定时器辅助类
+ * 1、支持常规的倒计时使用场景
+ * 2、支持倒计时的暂停及恢复
+ * 3、支持倒计时长及间隔时长的动态重置（非销毁重启）
  **/
-object XCountDownTimerHelper {
+object CountDownTimerHelper {
 
-    private val TAG = XCountDownTimerHelper::class.java.simpleName
+    private val TAG = CountDownTimerHelper::class.java.simpleName
+
+    // 默认倒计时间隔
+    private const val DEFAULT_COUNT_DOWN_INTERVAL = 1000L
+    // 补偿时间，补偿系统延时+代码误差大于间隔时隔时间的部分
+    private const val COMPENSATE_TIME = 100L
 
     // 定时总时长
     private var mMillisInFuture: Long = 0L
@@ -27,27 +35,34 @@ object XCountDownTimerHelper {
     // 剩余定时时长（预留：是否需要暴露到外层）
     private var mRemainTimeUntilFinish: Long = 0L
 
+    private var mStopped: Boolean = false
     private var mCancelled: Boolean = false
-    private var mOnXCountDownTimerListener: OnXCountDownTimerListener? = null
+    private var mOnCountDownTimerListener: OnCountDownTimerListener? = null
 
     private const val COUNT_DOWN_MSG = 10001
+    private const val KEEP_ALIVE_MSG = 10002
     private val mCountDownHandler: Handler = @SuppressLint("HandlerLeak") object : Handler() {
 
         override fun handleMessage(msg: Message) {
-            synchronized (XCountDownTimerHelper) {
+            synchronized (CountDownTimerHelper) {
                 if (mCancelled) {
                     return@synchronized
                 }
+                if (mStopped) {
+                    mStopTimeInFuture = mRemainTimeUntilFinish + SystemClock.elapsedRealtime()
+                    sendMessageDelayed(obtainMessage(KEEP_ALIVE_MSG), DEFAULT_COUNT_DOWN_INTERVAL)
+                    return@synchronized
+                }
 
-                mRemainTimeUntilFinish = mStopTimeInFuture - SystemClock.elapsedRealtime()
+                mRemainTimeUntilFinish = mStopTimeInFuture - SystemClock.elapsedRealtime() + COMPENSATE_TIME
                 if (mRemainTimeUntilFinish <= 0) {
-                    mOnXCountDownTimerListener?.onCountDownFinished()
+                    mOnCountDownTimerListener?.onCountDownFinished()
                 } else {
                     val lastTickStart = SystemClock.elapsedRealtime()
-                    mOnXCountDownTimerListener?.onCountDownIntervalTick(mRemainTimeUntilFinish)
+                    mOnCountDownTimerListener?.onCountDownIntervalTick(mRemainTimeUntilFinish)
 
                     val lastTickDuration = SystemClock.elapsedRealtime() - lastTickStart
-                    Log.w(TAG, "onCountDownIntervalTick cost = $lastTickDuration")
+//                    Log.w(TAG, "onCountDownIntervalTick cost = $lastTickDuration")
                     var delay: Long
                     if (mRemainTimeUntilFinish < mCountdownInterval) {
                         delay = mRemainTimeUntilFinish - lastTickDuration
@@ -68,8 +83,8 @@ object XCountDownTimerHelper {
     /**
      * 设置倒计时监听器
      */
-    fun setXOnCountDownTimerListener(onXCountDownTimerListener: OnXCountDownTimerListener) {
-        mOnXCountDownTimerListener = onXCountDownTimerListener
+    fun setOnCountDownTimerListener(onCountDownTimerListener: OnCountDownTimerListener) {
+        mOnCountDownTimerListener = onCountDownTimerListener
     }
 
     /**
@@ -77,16 +92,17 @@ object XCountDownTimerHelper {
      * @param millisInFuture 倒计总时长，单位：ms
      * @param countDownInterval 倒计时间隔，单位：ms
      */
-    fun startTimer(millisInFuture: Long, countDownInterval: Long) {
+    fun startTimer(millisInFuture: Long, countDownInterval: Long?) {
         if (millisInFuture <= 0) {
             mCancelled = true
-            mOnXCountDownTimerListener?.onCountDownFinished()
+            mOnCountDownTimerListener?.onCountDownFinished()
             return
         }
         mCancelled = false
+        mStopped = false
         mMillisInFuture = millisInFuture
-        mCountdownInterval = countDownInterval
         mStopTimeInFuture = SystemClock.elapsedRealtime() + mMillisInFuture
+        mCountdownInterval = if (countDownInterval == null || countDownInterval == 0L) DEFAULT_COUNT_DOWN_INTERVAL else countDownInterval
         mCountDownHandler.sendMessage(mCountDownHandler.obtainMessage(COUNT_DOWN_MSG))
     }
 
@@ -95,9 +111,11 @@ object XCountDownTimerHelper {
      */
     fun cancelTimer() {
         mCancelled = true
+        mStopped = true
+        mCountDownHandler.removeMessages(KEEP_ALIVE_MSG)
         mCountDownHandler.removeMessages(COUNT_DOWN_MSG)
         clearAllTimeConfig()
-        mOnXCountDownTimerListener?.onCountDownCancel()
+        mOnCountDownTimerListener?.onCountDownCancel()
     }
 
     /**
@@ -105,21 +123,39 @@ object XCountDownTimerHelper {
      * @param millisInFuture    倒计总时长，单位：ms
      * @param countDownInterval 倒计时间隔，单位：ms
      */
-    fun resetTimer(millisInFuture: Long, countDownInterval: Long) {
+    fun resetTimer(millisInFuture: Long, countDownInterval: Long?) {
         if (millisInFuture <= 0) {
             return
         }
-        mCancelled = true
-        mCountdownInterval = countDownInterval
         mMillisInFuture = millisInFuture
         mStopTimeInFuture = SystemClock.elapsedRealtime() + mMillisInFuture
-        mCancelled = false
+        mRemainTimeUntilFinish = mMillisInFuture
+        mCountdownInterval = if (countDownInterval == null || countDownInterval == 0L) DEFAULT_COUNT_DOWN_INTERVAL else countDownInterval
+    }
+
+    /**
+     * 暂停倒计时
+     */
+    fun stopTimer() {
+        mStopped = true
+    }
+
+    /**
+     * 恢复倒计时
+     */
+    fun resumeTimer() {
+        mStopped = false
     }
 
     /**
      * 是否已停止
      */
     fun isCancelled(): Boolean = mCancelled
+
+    /**
+     * 是否已暂停
+     */
+    fun isStopped(): Boolean = mStopped
 
     /**
      * 清空所有的时间设置
@@ -132,7 +168,7 @@ object XCountDownTimerHelper {
     }
 
 
-    interface OnXCountDownTimerListener {
+    interface OnCountDownTimerListener {
         /**
          * 倒计时结束
          */
