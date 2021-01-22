@@ -1,5 +1,6 @@
 package com.xiong.xprojectframework.widget
 
+import android.app.Dialog
 import com.xiong.xprojectframework.R
 
 /**
@@ -26,4 +27,5 @@ class TestBottomSheetDialogFragment: BaseBottomSheetDialogFragment() {
     override fun initData() {
 
     }
+
 }

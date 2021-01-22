@@ -73,6 +73,8 @@ abstract class BaseBottomSheetDialogFragment : BottomSheetDialogFragment() {
         return ViewGroup.LayoutParams.MATCH_PARENT
     }
 
+
+
     open fun initView() {}
 
     open fun initData() {}
